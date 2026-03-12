@@ -913,7 +913,7 @@ body.lock {
         display: flex;
         align-items: center;   
         justify-content: center; 
-        transition: transform 0,5s ease;
+        transition: transform 1s ease;
         z-index: 120;
 	}
     .header__main-menu.active {
