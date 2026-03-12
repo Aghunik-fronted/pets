@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const burger = document.querySelector('.header__burger'); // уточнили класс
+    const burger = document.querySelector('.header__burger'); 
     const menu = document.querySelector('.header__main-menu');
-    const overlay = document.getElementById('overlay');
+    const overlay = document.querySelector('.overlay');
     const body = document.body;
     const navLinks = document.querySelectorAll('.main-menu__link');
 
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
         menu.classList.toggle('active');
         overlay.classList.toggle('active');
         body.classList.toggle('lock');
-        console.log("Меню переключено!");
     }
 
     burger.addEventListener('click', toggleMenu);
