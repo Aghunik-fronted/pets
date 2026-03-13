@@ -440,8 +440,19 @@ body.lock {
 .slider__wrapper{
 	display: flex;
 	gap: 90px;
+	overflow: hidden;
+	width: 100%;
+	justify-content: center;
+	position: relative;
+}
+@keyframes move-right {
+    from { left: 0px; }
+    to { left: -100%; }
 }
 
+.transition-right {
+    animation: move-right 0.5s ease-in-out;
+}
 .slider__arrow{
 	position: absolute;
 	top: 50%;
