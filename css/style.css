@@ -367,7 +367,9 @@ body.lock {
 .friends__grid{
 	display: grid;
 	grid-template-columns: repeat(4, 1fr);
+	height: auto !important;
 	gap: 30px 40px;
+	justify-items: center;
 }
 
 .friends__section-title{
@@ -434,8 +436,9 @@ body.lock {
 	padding: 0 105px;
 	box-sizing: border-box;
 }
-.slider__iem {
+.slider__item {
 	display: block;
+	width: 100%;
 }
 .slider__wrapper{
 	display: flex;
@@ -453,6 +456,26 @@ body.lock {
 .transition-right {
     animation: move-right 0.5s ease-in-out;
 }
+/* .exit-animation {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: 0.4s ease-in;
+}
+
+.enter-animation {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(1.1);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+} */
 .slider__arrow{
 	position: absolute;
 	top: 50%;
@@ -742,7 +765,6 @@ body.lock {
 .burger{
 	display: none;
 }
-
 @media (max-width:1100px){
 	
 	.slider__wrapper{
@@ -750,7 +772,8 @@ body.lock {
 	}
 
 	.friends__grid{
-		grid-template-columns: repeat(3,1fr);
+		grid-template-columns: repeat(2,1fr);
+		gap: 30px 40px;
 	}
 }
 @media (max-width:991px){
@@ -1189,8 +1212,12 @@ body.lock {
 	}
 
 	.friends__grid{
-		padding: 0 9px;
-		grid-template-columns: 1fr 1fr;
+		padding: 0 15px;
+		grid-template-columns: 1fr;
+		grid-template-rows: repeat(3, auto);
+		height: auto !important;
+		justify-items: center;
+		gap: 30px;
 	}
 
 	.friends__pagination{
@@ -1220,6 +1247,7 @@ body.lock {
 
 	.friends__grid{
 		grid-template-columns: 1fr;
+		justify-items: center;
 	}
 
 	.friends__grid .friends-item:nth-child(n + 4){
@@ -1246,4 +1274,24 @@ body.lock {
 		margin-right: 0;
 	}
 
+}
+@media (max-width: 767px) {
+    /* 1. Сетка должна быть в одну колонку */
+    .friends__grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important; 
+        /* 2. Убираем ограничение по высоте, чтобы влезли все 3 */
+        height: auto !important; 
+        max-height: none !important;
+        /* 3. Расстояние между карточками */
+        gap: 30px !important;
+        justify-items: center;
+        margin-bottom: 40px;
+    }
+
+    /* 4. Проверь, чтобы сами карточки не были слишком огромными */
+    .slider__item {
+        width: 270px; /* или 100%, если хочешь на всю ширину */
+        display: block !important;
+    }
 }
