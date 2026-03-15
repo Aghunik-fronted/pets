@@ -556,6 +556,136 @@ body.lock {
 	color: var(--color-dark-l);
 	text-decoration: none;
 }
+.popup-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(41, 41, 41, 0.6); /* Затемнение +2 балла */
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Показываем при наличии класса active */
+.popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+	display: flex;
+	z-index: 1000;
+}
+
+/* 2. Окно попапа */
+.popup-window {
+    position: relative;
+    background: #FAFAFA;
+    border-radius: 9px;
+    max-width: 900px;
+    width: auto;
+    display: flex;
+    box-shadow: 0px 2px 35px 14px rgba(13, 13, 13, 0.04);
+    cursor: default; /* На самом окне курсор обычный */
+    transition: transform 0.3s ease;
+    transform: scale(0.8);
+}
+
+.popup-overlay.active .popup-window {
+    transform: scale(1);
+}
+
+/* 3. Кнопка закрытия (Крестик) */
+.popup-close-btn {
+    position: absolute;
+    top: -52px;
+    right: -42px;
+    width: 52px;
+    height: 52px;
+    background: transparent;
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.popup-close-btn:hover {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary-light);
+}
+
+/* 4. Контент внутри (Картинка + Текст) */
+.popup-container {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.popup-img {
+    width: 500px;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 9px 0 0 9px;
+}
+
+.popup-info {
+    padding: 10px 20px 10px 0;
+    max-width: 350px;
+}
+
+.popup-name {
+    font-family: var(--font-family);
+    font-size: 35px;
+    line-height: 1.3;
+    letter-spacing: 0.06em;
+    color: #000;
+    margin-bottom: 10px;
+}
+
+.popup-type {
+    font-family: var(--font-family);
+    font-size: 20px;
+    line-height: 1.3;
+    letter-spacing: 0.06em;
+    margin-bottom: 40px;
+}
+
+.popup-description {
+    font-family: var(--font-family);
+    font-size: 15px;
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+    margin-bottom: 40px;
+}
+
+/* Список характеристик */
+.popup-list {
+    list-style: none;
+    padding: 0;
+}
+
+.popup-list li {
+    font-family: var(--font-family);
+    font-size: 15px;
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+    margin-bottom: 11px;
+    position: relative;
+    padding-left: 15px;
+}
+
+.popup-list li::before {
+    content: "•";
+    color: var(--color-primary);
+    position: absolute;
+    left: 0;
+}
+
 
 .help{
 	padding: 80px 0 100px;
@@ -765,6 +895,36 @@ body.lock {
 .burger{
 	display: none;
 }
+
+@media (max-width: 1279px) {
+    .friends__grid {
+        grid-template-columns: repeat(2, 1fr) !important; 
+        gap: 30px 40px; 
+        justify-items: center;
+        width: 100%;
+		max-width: 580px;
+        margin: 0 auto; 
+    }
+	.popup-window { 
+		max-width: 630px; 
+	}
+    .popup-img { 
+		width: 350px; 
+		height: 350px; 
+	}
+    .popup-info { 
+		max-width: 260px; 
+	}
+    .popup-name { 
+		margin-bottom: 10px; 
+	}
+    .popup-type { 
+		margin-bottom: 20px; 
+	}
+    .popup-description { 
+		margin-bottom: 20px; font-size: 13px; 
+	}
+}
 @media (max-width:1100px){
 	
 	.slider__wrapper{
@@ -831,8 +991,14 @@ body.lock {
 		gap: 40px;
 	}
 
-	.slider__item:nth-child(3){
+	/* .slider__item:nth-child(3){
 		display: none;
+	} */
+	.popup-window { 
+		max-width: 630px; 
+	}
+    .popup-img { 
+		width: 350px; height: 350px; 
 	}
 	
 	.help{
@@ -897,13 +1063,18 @@ body.lock {
 		margin-bottom: 60px;
 	}
 	.friends__grid{
-		grid-template-columns: repeat(2,1fr);
+		display: grid !important;
+		grid-template-columns: repeat(2,1fr) !important;
+		gap: 30px 40px;
 		padding: 0 64px;
+		width: 100%;
+		max-width: 580px;
+		margin: 0 auto;
 	}
 
-	.friends__grid .friends-item:nth-child(n + 7){
+	/* .friends__grid .friends-item:nth-child(n + 7){
 		display: none;
-	}
+	} */
 
 	.friends__pagination{
 		margin-top: 40px;
@@ -1096,6 +1267,24 @@ body.lock {
 	.friends__button{
 		margin-top: 42px;
 	}
+	.popup-window { 
+		max-width: 240px; 
+		flex-direction: column; 
+	}
+    .popup-img { 
+		display: none; 
+	} 
+	.popup-info {
+        padding: 10px;
+        text-align: center;
+        max-width: 100%;
+    }
+    .popup-list {
+        text-align: left;
+    }
+    .popup-close-btn { 
+		right: -30px; 
+	}
 	
 	.help{
 		padding: 42px 0 39px;
@@ -1276,22 +1465,17 @@ body.lock {
 
 }
 @media (max-width: 767px) {
-    /* 1. Сетка должна быть в одну колонку */
     .friends__grid {
         display: grid !important;
         grid-template-columns: 1fr !important; 
-        /* 2. Убираем ограничение по высоте, чтобы влезли все 3 */
         height: auto !important; 
         max-height: none !important;
-        /* 3. Расстояние между карточками */
         gap: 30px !important;
         justify-items: center;
         margin-bottom: 40px;
     }
-
-    /* 4. Проверь, чтобы сами карточки не были слишком огромными */
     .slider__item {
-        width: 270px; /* или 100%, если хочешь на всю ширину */
+        width: 270px; 
         display: block !important;
     }
 }
