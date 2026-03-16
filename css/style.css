@@ -520,6 +520,7 @@ body.lock {
 	text-decoration: none;
 	background: var(--color-light-s);
 	border-radius: 9px;
+	cursor: pointer;
 	transition: 0.3s;
 }
 
@@ -531,6 +532,7 @@ body.lock {
 .friends-item:hover .friends-item__button{
 	background: var(--color-primary-light);
 	border-color: var(--color-primary-light);
+	cursor: pointer;
 }
 
 .friends-item__image-container{
