@@ -120,34 +120,6 @@ const petsData = [
     }
 ];
 
-const btnLeft = document.querySelector('.slider__arrow--left');
-const btnRight = document.querySelector('.slider__arrow--right');
-const sliderWrapper = document.querySelector('.slider__wrapper');
-
-let currentPetsIndices = [];
-let previousPetsIndices = []; 
-
-const getCardsCount = () => {
-    const screenWidth = window.innerWidth;
-    if (screenWidth >= 1280) return 3;
-    if (screenWidth >= 768) return 2;
-    return 1;
-};
-
-const generateRandomIndices = (count, excludeIndices) => {
-    const newIndices = [];
-    const availableIndices = petsData
-        .map((_, index) => index)
-        .filter(index => !excludeIndices.includes(index));
-
-    while (newIndices.length < count) {
-        const randomIndex = Math.floor(Math.random() * availableIndices.length);
-        const petIndex = availableIndices.splice(randomIndex, 1)[0];
-        newIndices.push(petIndex);
-    }
-    return newIndices;
-};
-
 const createCardElement = (petIndex) => {
     const pet = petsData[petIndex];
     const cardDiv = document.createElement('div');
@@ -163,24 +135,66 @@ const createCardElement = (petIndex) => {
     return cardDiv;
 };
 
-const renderWithAnimation = (nextIndices) => {
-    const currentCards = document.querySelectorAll('.slider__item');
-    currentCards.forEach(card => card.style.opacity = '0');
+// --- УНИВЕРСАЛЬНЫЙ ПОПАП (Делегирование) ---
+// Этот код должен быть в самом конце файла!
+document.addEventListener('click', (event) => {
+    // Делегирование: ищем карточку в любом месте (слайдер или сетка)
+    const card = event.target.closest('.slider__item') || event.target.closest('.friends-item');
+    
+    if (card) {
+        event.preventDefault();
+        const titleEl = card.querySelector('.friends-item__title');
+        if (!titleEl) return;
 
-    setTimeout(() => {
-        sliderWrapper.innerHTML = "";
-        nextIndices.forEach(index => {
-            const card = createCardElement(index);
-            card.style.opacity = '0';
-            sliderWrapper.appendChild(card);
-            setTimeout(() => card.style.opacity = '1', 50);
-        });
-        previousPetsIndices = currentPetsIndices;
-        currentPetsIndices = nextIndices;
-    }, 300);
-};
+        const petName = titleEl.textContent.trim();
+        const petInfo = petsData.find(p => p.name === petName);
+        
+        if (petInfo) {
+            showPetPopup(petInfo);
+        }
+    }
+});
+
+function showPetPopup(pet) {
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay'; 
+    overlay.innerHTML = `
+        <div class="popup-window">
+            <button class="popup-close-btn">×</button>
+            <div class="popup-container">
+                <img src="${pet.img}" alt="${pet.name}" class="popup-img">
+                <div class="popup-info">
+                    <h3 class="popup-name">${pet.name}</h3>
+                    <h4 class="popup-type">${pet.type} - ${pet.breed}</h4>
+                    <p class="popup-description">${pet.description}</p>
+                    <ul class="popup-list">
+                        <li><b>Age:</b> ${pet.age}</li>
+                        <li><b>Inoculations:</b> ${pet.inoculations.join(', ')}</li>
+                        <li><b>Diseases:</b> ${pet.diseases.join(', ')}</li>
+                        <li><b>Parasites:</b> ${pet.parasites.join(', ')}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+    document.body.classList.add('lock');
+
+    setTimeout(() => overlay.classList.add('active'), 10);
+
+    const close = () => {
+        overlay.classList.remove('active');
+        document.body.classList.remove('lock');
+        setTimeout(() => overlay.remove(), 300);
+    };
+
+    overlay.onclick = (e) => {
+        if (e.target === overlay || e.target.closest('.popup-close-btn')) close();
+    };
+}
 
 const initSlider = () => {
+    if (!sliderWrapper) return;
     const count = getCardsCount();
     currentPetsIndices = generateRandomIndices(count, []);
     sliderWrapper.innerHTML = "";
@@ -209,38 +223,37 @@ if (btnRight && btnLeft) {
     window.addEventListener('resize', initSlider);
 }
 
-// pogination
+// --- PAGINATION (Сетка карточек) ---
 const petsGrid = document.querySelector('.friends__grid');
 
 if (petsGrid && !document.querySelector('.slider__wrapper')) {
     let fullPetsList = [];
     let currentPage = 1;
 
-
+    // Генерируем 48 питомцев (6 повторений по 8 уникальных)
     const generate48Pets = () => {
-    let res = [];
-    for (let i = 0; i < 6; i++) {
-        const group = [0, 1, 2, 3, 4, 5, 6, 7].sort(() => Math.random() - 0.5);
-        res.push(...group); 
-    }
-    return res;
-};
+        let res = [];
+        for (let i = 0; i < 6; i++) {
+            const group = [0, 1, 2, 3, 4, 5, 6, 7].sort(() => Math.random() - 0.5);
+            res.push(...group);
+        }
+        return res;
+    };
     fullPetsList = generate48Pets();
 
     const allLinks = document.querySelectorAll('.pagination__link');
     let btnFirst, btnPrev, btnNext, btnLast, pageNum;
 
     allLinks.forEach(link => {
-    if (!link) return;
+        if (!link) return;
+        const text = (link.textContent || "").trim();
+        if (text === '<<') btnFirst = link;
+        else if (text === '<') btnPrev = link;
+        else if (text === '>') btnNext = link;
+        else if (text === '>>') btnLast = link;
+        else if (link.classList.contains('pagination__link--current')) pageNum = link;
+    });
 
-    const text = link.innerText ? link.innerText.trim() : ""; 
-    
-    if (text === '<<') btnFirst = link;
-    else if (text === '<') btnPrev = link;
-    else if (text === '>') btnNext = link;
-    else if (text === '>>') btnLast = link;
-    else if (link.classList.contains('pagination__link--current')) pageNum = link;
-});
     const getItemsPerPage = () => {
         const width = window.innerWidth;
         if (width >= 1280) return 8;
@@ -250,93 +263,34 @@ if (petsGrid && !document.querySelector('.slider__wrapper')) {
 
     const renderPage = () => {
         const perPage = getItemsPerPage();
-        const total = 48 / perPage;
-
+        const totalPages = Math.ceil(fullPetsList.length / perPage);
+        
         petsGrid.innerHTML = "";
-        fullPetsList.slice((currentPage - 1) * perPage, currentPage * perPage).forEach(idx => {
+        const start = (currentPage - 1) * perPage;
+        fullPetsList.slice(start, start + perPage).forEach(idx => {
             petsGrid.appendChild(createCardElement(idx));
         });
 
-        pageNum.innerText = currentPage;
+        if (pageNum) pageNum.innerText = currentPage;
 
         const updateState = (btn, isDisable) => {
-            if (isDisable) {
-                btn.classList.add('pagination__link--disable');
-                btn.style.pointerEvents = 'none'; 
-            } else {
-                btn.classList.remove('pagination__link--disable');
-                btn.style.pointerEvents = 'auto'; 
-            }
+            if (!btn) return;
+            btn.classList.toggle('pagination__link--disable', isDisable);
+            btn.style.pointerEvents = isDisable ? 'none' : 'auto';
         };
 
         updateState(btnFirst, currentPage === 1);
         updateState(btnPrev, currentPage === 1);
-        updateState(btnNext, currentPage === total);
-        updateState(btnLast, currentPage === total);
+        updateState(btnNext, currentPage === totalPages);
+        updateState(btnLast, currentPage === totalPages);
     };
 
-    btnNext.onclick = (e) => { e.preventDefault(); currentPage++; renderPage(); };
-    btnPrev.onclick = (e) => { e.preventDefault(); currentPage--; renderPage(); };
-    btnFirst.onclick = (e) => { e.preventDefault(); currentPage = 1; renderPage(); };
-    btnLast.onclick = (e) => { e.preventDefault(); currentPage = 48 / getItemsPerPage(); renderPage(); };
+    // Назначаем события кнопкам
+    if (btnFirst) btnFirst.onclick = () => { currentPage = 1; renderPage(); };
+    if (btnLast) btnLast.onclick = () => { currentPage = Math.ceil(48 / getItemsPerPage()); renderPage(); };
+    if (btnPrev) btnPrev.onclick = () => { if (currentPage > 1) { currentPage--; renderPage(); } };
+    if (btnNext) btnNext.onclick = () => { if (currentPage < Math.ceil(48 / getItemsPerPage())) { currentPage++; renderPage(); } };
 
+    document.addEventListener('DOMContentLoaded', renderPage);
     window.addEventListener('resize', renderPage);
-    window.addEventListener('load', renderPage);
-}
-
-// popup
-
-document.addEventListener('click', (e) => {
-    const card = e.target.closest('.slider__item') || e.target.closest('.friends-item');
-    
-    if (card) {
-        e.preventDefault();
-        console.log("ПОПАП: Клик по карточке зафиксирован!");
-
-        const titleElement = card.querySelector('.friends-item__title');
-        if (!titleElement) {
-            console.error("ПОПАП: Не найден заголовок .friends-item__title");
-            return;
-        }
-
-        const name = titleElement.textContent.trim();
-        console.log("ПОПАП: Ищем в базе питомца:", name);
-
-        const pet = petsData.find(p => p.name === name);
-        if (pet) {
-            renderPopup(pet);
-        } else {
-            console.error("ПОПАП: Питомец не найден в массиве petsData");
-        }
-    }
-});
-
-function renderPopup(pet) {
-    console.log("ПОПАП: Рисую окно для", pet.name);
-    
-    const div = document.createElement('div');
-    div.className = 'popup-overlay active'; 
-    div.innerHTML = `
-        <div class="popup-window active" style="transform: scale(1); opacity: 1;">
-            <button class="popup-close-btn">×</button>
-            <div class="popup-container">
-                <img src="${pet.img}" alt="${pet.name}" class="popup-img">
-                <div class="popup-info">
-                    <h3 class="popup-name">${pet.name}</h3>
-                    <h4 class="popup-type">${pet.type} - ${pet.breed}</h4>
-                    <p class="popup-description">${pet.description}</p>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(div);
-    document.body.classList.add('lock');
-
-    div.onclick = (e) => {
-        if (e.target === div || e.target.closest('.popup-close-btn')) {
-            div.remove();
-            document.body.classList.remove('lock');
-        }
-    };
 }
