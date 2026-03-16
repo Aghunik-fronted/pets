@@ -231,14 +231,16 @@ if (petsGrid && !document.querySelector('.slider__wrapper')) {
     let btnFirst, btnPrev, btnNext, btnLast, pageNum;
 
     allLinks.forEach(link => {
-        const text = link.innerText.trim();
-        if (text === '<<') btnFirst = link;
-        else if (text === '<') btnPrev = link;
-        else if (text === '>') btnNext = link;
-        else if (text === '>>') btnLast = link;
-        else if (link.classList.contains('pagination__link--current')) pageNum = link;
-    });
+    if (!link) return;
 
+    const text = link.innerText ? link.innerText.trim() : ""; 
+    
+    if (text === '<<') btnFirst = link;
+    else if (text === '<') btnPrev = link;
+    else if (text === '>') btnNext = link;
+    else if (text === '>>') btnLast = link;
+    else if (link.classList.contains('pagination__link--current')) pageNum = link;
+});
     const getItemsPerPage = () => {
         const width = window.innerWidth;
         if (width >= 1280) return 8;
@@ -283,29 +285,39 @@ if (petsGrid && !document.querySelector('.slider__wrapper')) {
 }
 
 // popup
-document.addEventListener('click', (event) => {
-    // Ищем карточку
-    const card = event.target.closest('.slider__item') || event.target.closest('.friends-item');
+
+document.addEventListener('click', (e) => {
+    const card = e.target.closest('.slider__item') || e.target.closest('.friends-item');
     
     if (card) {
-        event.preventDefault();
-        const petName = card.querySelector('.friends-item__title').textContent.trim();
-        const petInfo = petsData.find(p => p.name === petName);
-        
-        if (petInfo) {
-            renderPopup(petInfo); // Вызываем новую функцию
+        e.preventDefault();
+        console.log("ПОПАП: Клик по карточке зафиксирован!");
+
+        const titleElement = card.querySelector('.friends-item__title');
+        if (!titleElement) {
+            console.error("ПОПАП: Не найден заголовок .friends-item__title");
+            return;
+        }
+
+        const name = titleElement.textContent.trim();
+        console.log("ПОПАП: Ищем в базе питомца:", name);
+
+        const pet = petsData.find(p => p.name === name);
+        if (pet) {
+            renderPopup(pet);
+        } else {
+            console.error("ПОПАП: Питомец не найден в массиве petsData");
         }
     }
 });
 
-// 2. Функция, которая САМА создает всё в HTML
 function renderPopup(pet) {
-    // Создаем оверлей
-    const overlay = document.createElement('div');
-    overlay.classList.add('popup-overlay'); // проверь, чтобы в CSS был этот класс!
+    console.log("ПОПАП: Рисую окно для", pet.name);
     
-    overlay.innerHTML = `
-        <div class="popup-window">
+    const div = document.createElement('div');
+    div.className = 'popup-overlay active'; 
+    div.innerHTML = `
+        <div class="popup-window active" style="transform: scale(1); opacity: 1;">
             <button class="popup-close-btn">×</button>
             <div class="popup-container">
                 <img src="${pet.img}" alt="${pet.name}" class="popup-img">
@@ -313,33 +325,18 @@ function renderPopup(pet) {
                     <h3 class="popup-name">${pet.name}</h3>
                     <h4 class="popup-type">${pet.type} - ${pet.breed}</h4>
                     <p class="popup-description">${pet.description}</p>
-                    <ul class="popup-list">
-                        <li><b>Age:</b> ${pet.age}</li>
-                        <li><b>Inoculations:</b> ${pet.inoculations.join(', ')}</li>
-                        <li><b>Diseases:</b> ${pet.diseases.join(', ')}</li>
-                        <li><b>Parasites:</b> ${pet.parasites.join(', ')}</li>
-                    </ul>
                 </div>
             </div>
         </div>
     `;
 
-    document.body.appendChild(overlay);
+    document.body.appendChild(div);
     document.body.classList.add('lock');
 
-    // Плавное появление (через небольшой таймаут)
-    setTimeout(() => overlay.classList.add('active'), 10);
-
-    // Закрытие
-    const closePopup = () => {
-        overlay.classList.remove('active');
-        document.body.classList.remove('lock');
-        setTimeout(() => overlay.remove(), 300); // Удаляем из HTML совсем
-    };
-
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay || e.target.closest('.popup-close-btn')) {
-            closePopup();
+    div.onclick = (e) => {
+        if (e.target === div || e.target.closest('.popup-close-btn')) {
+            div.remove();
+            document.body.classList.remove('lock');
         }
-    });
+    };
 }
