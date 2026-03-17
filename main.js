@@ -19,8 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (overlay) overlay.addEventListener('click', toggleMenu);
 
     navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (menu.classList.contains('active')) toggleMenu();
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href.startsWith('#')) {
+                e.preventDefault(); 
+                const targetId = href.substring(1);
+                const targetElement = document.getElementById(targetId);
+
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            }
+            if (menu.classList.contains('active')) {
+                toggleMenu();
+            }
         });
     });
 });
@@ -37,7 +51,7 @@ const petsData = [
     { name: "Freddie", img: "images/8.jpg", type: "Cat", breed: "British Shorthair", description: "Freddie is a big, fluffy cat.", age: "2 months", inoculations: ["none"], diseases: ["none"], parasites: ["none"] }
 ];
 
-// --- 3. COMMON CARD CREATOR ---
+// --- 3. CARD CREATOR ---
 const createCardElement = (petIndex) => {
     const pet = petsData[petIndex];
     const cardDiv = document.createElement('div');
@@ -175,11 +189,9 @@ if (petsGrid && !document.querySelector('.slider__wrapper')) {
 
 // --- POPUP LOGIC ---
 document.addEventListener('click', (event) => {
-    // Ищем карточку (в слайдере или в сетке)
     const card = event.target.closest('.friends-item') || event.target.closest('.slider__item');
     
     if (card) {
-        // Берем имя питомца из заголовка внутри карточки
         const titleEl = card.querySelector('.friends-item__title');
         if (!titleEl) return;
 
@@ -216,9 +228,8 @@ function showPetPopup(pet) {
         </div>`;
 
     document.body.appendChild(overlay);
-    document.body.classList.add('lock'); // Должно быть overflow: hidden в CSS
+    document.body.classList.add('lock'); 
 
-    // Плавное появление
     setTimeout(() => overlay.classList.add('active'), 10);
 
     const closePopup = () => {
@@ -227,14 +238,12 @@ function showPetPopup(pet) {
         setTimeout(() => overlay.remove(), 300);
     };
 
-    // Закрытие по клику на оверлей или крестик
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay || e.target.closest('.popup-close-btn')) {
             closePopup();
         }
     });
 
-    // Эффект наведения на кнопку закрытия, когда мышка над оверлеем (ТЗ)
     overlay.addEventListener('mouseover', (e) => {
         const closeBtn = overlay.querySelector('.popup-close-btn');
         if (e.target === overlay) closeBtn.classList.add('hover');
